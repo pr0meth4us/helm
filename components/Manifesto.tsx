@@ -1,9 +1,9 @@
 'use client';
-import { motion, useInView } from 'framer-motion';
+import { motion, useInView, Variants } from 'framer-motion';
 import { useRef } from 'react';
 
 // Animation variants for the words
-const wordVariants = {
+const wordVariants: Variants = {
   hidden: { opacity: 0, filter: 'blur(10px)', y: 20 },
   visible: {
     opacity: 1,
@@ -38,12 +38,13 @@ export function Manifesto() {
       <div ref={ref} className="max-w-4xl mx-auto text-center relative z-10">
 
         {/* Header: Glitchy Terminal Label */}
+        {/* FIX: Wrapped text in braces to satisfy ESLint */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
           className="font-mono text-xs text-helm-cyan/50 mb-12 tracking-[0.5em] uppercase"
         >
-          // idk what goes here
+          {'// PHILOSOPHY_CORE'}
         </motion.div>
 
         {/* Main Text Block - Rendered Word by Word */}
@@ -86,7 +87,6 @@ export function Manifesto() {
             — Immanuel Kant
           </motion.div>
 
-          {/* Bottom Data HUD */}
 
         </div>
       </div>
