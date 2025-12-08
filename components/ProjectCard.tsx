@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Project } from '@/data/projects';
+import { Project } from '@/types'; // FIX: Point to correct type definition file
 import { Badge } from '@/components/ui/Badge';
 import { ArrowUpRight } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -30,7 +30,6 @@ export function ProjectCard({ project }: { project: Project }) {
             />
 
             {/* === 2. THE LIGHT ON THE PICTURE (Scanner Effect) === */}
-            {/* A scanning beam that passes over the image on hover */}
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-helm-cyan/10 to-transparent translate-y-[-100%] group-hover:translate-y-[100%] transition-transform duration-1000 ease-in-out z-10" />
             <div className="absolute w-full h-[1px] bg-helm-cyan/50 top-0 shadow-[0_0_15px_rgba(102,252,241,1)] translate-y-[-100%] group-hover:translate-y-[256px] transition-transform duration-1000 ease-in-out z-20 delay-75" />
 
