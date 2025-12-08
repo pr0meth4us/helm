@@ -1,26 +1,52 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+    /* Brand Colors */
+    --color-helm-dark: #0B0C10;
+    --color-helm-gray: #1F2833;
+    --color-helm-silver: #C5C6C7;
+    --color-helm-cyan: #66FCF1;
+    --color-helm-teal: #45A29E;
+
+    /* Fonts */
+    --font-inter: var(--font-inter);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@layer base {
+    body {
+        background-color: var(--color-helm-dark);
+        color: var(--color-helm-silver);
+        font-family: var(--font-inter), sans-serif;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        @apply text-white font-bold tracking-tight;
+    }
+
+    /* Custom Selection Color */
+    ::selection {
+        background-color: var(--color-helm-cyan);
+        color: var(--color-helm-dark);
+    }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+@layer components {
+    /* Minimalist buttons for an exhibition feel */
+    .btn-exhibit {
+        @apply inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-helm-teal/30
+        bg-helm-gray/50 text-helm-cyan hover:bg-helm-teal/10 hover:border-helm-cyan
+        transition-all duration-300 text-sm font-medium backdrop-blur-sm;
+    }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+    /* Special CTA for the commercial product */
+    .btn-commercial {
+        @apply inline-flex items-center gap-2 px-6 py-3 rounded-full
+        bg-helm-cyan text-helm-dark font-bold hover:bg-white hover:scale-105
+        transition-all duration-300 shadow-[0_0_20px_rgba(102,252,241,0.3)];
+    }
+
+    .card-glass {
+        @apply bg-helm-gray/40 border border-white/5 backdrop-blur-md rounded-xl overflow-hidden;
+    }
 }
