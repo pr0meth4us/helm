@@ -97,15 +97,19 @@ export default function Home() {
                         <div>
                             {/* eslint-disable-next-line react/jsx-no-comment-textnodes */}
                             <h3 className="text-white font-bold mb-4">// COMM_UPLINK</h3>
-                            <a href="mailto:phearaneron.soeung@gmail.com" className="text-helm-cyan hover:bg-helm-cyan hover:text-helm-dark px-1 transition-colors block w-fit mb-2">
-                                {'>'} phearaneron.soeung@gmail.com
-                            </a>
-                            <a href="https://github.com/pr0meth4us" target="_blank" className="text-helm-cyan hover:bg-helm-cyan hover:text-helm-dark px-1 transition-colors block w-fit">
-                                {'>'} github.com/pr0meth4us
-                            </a>
-                            <a href="https://pr0meth4us.github.io/" target="_blank" className="text-helm-cyan hover:bg-helm-cyan hover:text-helm-dark px-1 transition-colors block w-fit">
-                                {'>'} pr0meth4us.github.io
-                            </a>
+
+                            {/* FIX: Container with space-y for equal vertical spacing */}
+                            <div className="flex flex-col space-y-2">
+                                <a href="mailto:phearaneron.soeung@gmail.com" className="text-helm-cyan hover:bg-helm-cyan hover:text-helm-dark px-1 transition-colors block w-full">
+                                    {'>'} phearaneron.soeung@gmail.com
+                                </a>
+                                <a href="https://github.com/pr0meth4us" target="_blank" className="text-helm-cyan hover:bg-helm-cyan hover:text-helm-dark px-1 transition-colors block w-full">
+                                    {'>'} github.com/pr0meth4us
+                                </a>
+                                <a href="https://pr0meth4us.github.io/" target="_blank" className="text-helm-cyan hover:bg-helm-cyan hover:text-helm-dark px-1 transition-colors block w-full">
+                                    {'>'} pr0meth4us.github.io
+                                </a>
+                            </div>
                         </div>
                         <div className="text-helm-silver/40 text-right">
                             <p>SYSTEM STATUS: OPTIMAL</p>
