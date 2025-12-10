@@ -33,7 +33,6 @@ export default function Home() {
               <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
               <TextScramble text="SYSTEM ONLINE // CONNECTION SECURE" />
             </div>
-            <TextScramble text="IDENTITY CONFIRMED: PROMETHEUS" trigger={true} />
           </div>
 
           <motion.div
