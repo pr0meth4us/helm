@@ -107,7 +107,7 @@ export default function Home() {
             <div className="text-helm-silver/40 text-right">
               <p>SYSTEM STATUS: OPTIMAL</p>
               <p>HELM v2.0 // BUILD 2025</p>
-              <p>© PROMETHEUS</p>
+              <p>© PR0METH4US</p>
             </div>
           </div>
         </div>
