@@ -2,8 +2,8 @@ export type ProjectCategory = 'Government' | 'Education' | 'AI/ML' | 'Tool' | 'F
 
 export interface ProjectLink {
     label: string;
-    url: string;
-    type: 'github' | 'demo' | 'dedicated-site';
+    url: string; // Can be '#' for private links
+    type: 'github' | 'demo' | 'dedicated-site' | 'private'; // Added 'private'
 }
 
 export interface Project {
