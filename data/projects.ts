@@ -12,7 +12,7 @@ export const projects: Project[] = [
         coverImage: 'https://res.cloudinary.com/dktzt7yn1/image/upload/v1765329932/logo_zyan4g.png',
         isCommercial: true,
         links: [
-            { label: 'Start Using Bot', url: 'https://t.me/expenditure_tracker_GUI_bot', type: 'dedicated-site' },
+            { label: 'Start Using Bot', url: 'https://savvify-web.vercel.app/', type: 'dedicated-site' },
 
             // === CLASSIFIED: Code not shared ===
             { label: 'Source Code', url: '#', type: 'private' }
