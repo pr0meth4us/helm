@@ -142,7 +142,7 @@ export const projects: Project[] = [
         category: 'Tool',
         description: 'A standalone digital art installation exploring memory, distortion, and loss. Built with GSAP and raw HTML5 canvas to create a disorienting, non-linear narrative experience. It functions not as a utility, but as a vessel for "Saudade"—the presence of absence.',
         techStack: ['HTML5', 'GSAP Animation', 'WebGL', 'Audio Reactive'],
-        coverImage: 'https://res.cloudinary.com/dktzt7yn1/image/upload/v1741504865/mnemosyne_y4vsar.png',
+        coverImage: '/shattered.png',
         isCommercial: false,
         links: [
             {

@@ -1,5 +1,4 @@
 @import "tailwindcss";
-
 @theme {
     /* Brand Colors */
     --color-helm-dark: #0B0C10;
@@ -10,6 +9,8 @@
 
     /* Fonts */
     --font-inter: var(--font-inter);
+    /* Added new serif font variable */
+    --font-cormorant-garamond: var(--font-cormorant-garamond);
 }
 
 @layer base {
@@ -18,6 +19,11 @@
         color: var(--color-helm-silver);
         font-family: var(--font-inter), sans-serif;
         -webkit-font-smoothing: antialiased;
+    }
+
+    /* Define font-serif utility */
+    .font-serif {
+        font-family: var(--font-cormorant-garamond), serif;
     }
 
     h1, h2, h3, h4, h5, h6 {

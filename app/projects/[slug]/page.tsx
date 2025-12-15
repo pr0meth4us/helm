@@ -81,10 +81,15 @@ export default async function ProjectPage({
                             Memory is not an archive. It is a storyteller with an agenda. It does not aim for accuracy, but for coherence—for a version of the past that can live inside us without tearing us apart. Pain, when left raw, is unbearable. So memory processes it, much like grief processes death: slowly, selectively, and with embellishment. What remains is not the truth of what happened, but the feeling that something mattered.
                         </p>
 
-                        {/* PULL QUOTE - High Contrast */}
-                        <blockquote className="border-l-4 border-helm-cyan pl-8 my-16 text-3xl font-sans text-helm-cyan/90 font-bold tracking-tight bg-white/5 p-4 rounded-lg shadow-xl shadow-helm-cyan/10">
-                            &#34;The mind smooths the past because jagged memories are too painful to hold continuously.&#34;
-                        </blockquote>
+                        {/* PULL QUOTE - High Contrast (REDESIGNED) */}
+                        <div className="my-16">
+                            <p className="font-mono text-xs text-helm-cyan tracking-widest mb-2 border-b border-helm-cyan/30 pb-1">
+                                // MEMORY_FRAGMENT_RETRIEVED
+                            </p>
+                            <blockquote className="border-l-4 border-[#cd5c27] pl-8 text-3xl font-sans text-white/90 font-bold tracking-tight bg-white/5 p-4">
+                                &#34;The mind smooths the past because jagged memories are too painful to hold continuously.&#34;
+                            </blockquote>
+                        </div>
 
                         <p className="py-4">
                             This is why nostalgia feels warm even when what it remembers was not. The warmth does not come from the event itself, but from the knowledge that the event is gone. Absence gives meaning retroactively. A small room becomes “cozy” only after you have left it forever. Silence becomes “peaceful” only once it can no longer surround you.

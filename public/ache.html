@@ -169,7 +169,7 @@
         .mnemo-reflect {
             transform: scaleY(-1);
             opacity: 0.2;
-            filter: blur(4px) wave(2px);
+            filter: blur(4px);
             background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0.5));
             -webkit-background-clip: text;
             background-clip: text;
@@ -204,6 +204,24 @@
 
         /* Heavy Reality Bleed */
         .heavy-bleed { display: inline-block; transition: all 1s ease; }
+
+        /* New Image Container Styles */
+        #image-distortion-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            /* Using a 16:9 aspect ratio container height */
+            height: 0;
+            padding-bottom: 56.25%;
+        }
+        #distortion-image-asset {
+            /* Set to cover the 16:9 container, object-cover might be better if the container is fixed size, but object-contain is safer */
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 0 20px rgba(0,0,0,0.5));
+        }
 
     </style>
 </head>
@@ -388,6 +406,7 @@
         </div>
     </section>
 
+
     <!-- 5.5 The Heavy Reality (Bleed Animation) -->
     <section class="section min-h-screen bg-[#e8e6e1] text-[#1a1a1a] relative" id="sec-heavy">
         <div class="max-w-5xl text-center hover-trigger relative z-10">
@@ -400,6 +419,24 @@
             <p class="font-serif italic text-3xl md:text-5xl text-gray-500 opacity-0 translate-y-10" id="heavy-sub">
                 they never mattered<br>
                 to you all that much.
+            </p>
+        </div>
+    </section>
+
+    <!-- 5.1 Abstract Conceptual Art: Image Display (ISOLATED) -->
+    <section class="section min-h-screen bg-[#1a1a1a] text-[#e8e6e1] relative overflow-hidden" id="sec-distortion" data-theme="dark">
+        <div class="relative w-full max-w-4xl flex flex-col items-center justify-center hover-trigger p-4">
+            <!-- Container with 16:9 aspect ratio and max width -->
+            <div id="image-distortion-container" class="relative w-full h-0 pb-[56.25%] max-w-4xl">
+                <!-- Updated image source to use the uploaded file -->
+                <img src="./nt-shattered.png"
+                     alt="Abstract conceptual art representing the distortion of memory and time. Dark, ethereal, orange/teal lighting."
+                     class="w-full h-full object-contain object-center opacity-0 scale-90"
+                     id="distortion-image-asset">
+            </div>
+
+            <p class="font-serif italic text-xl md:text-3xl text-gray-400 mt-12 opacity-0" id="distortion-caption-image">
+                The geometry of loss is rarely clean.
             </p>
         </div>
     </section>
@@ -682,6 +719,9 @@
     const body = document.body;
     let idleTimer;
 
+    // Get all elements that should trigger a temporary dark theme
+    const darkSections = gsap.utils.toArray('[data-theme="dark"]');
+
     // Cursor Movement
     function resetIdle() {
         body.classList.remove('idle');
@@ -725,6 +765,33 @@
     hoverTriggers.forEach(el => {
         el.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
         el.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+    });
+
+    // --- Dark Mode Toggle Logic (Updated for new section) ---
+    window.addEventListener('scroll', () => {
+        const scrollPercent = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+        document.getElementById('progress').style.height = scrollPercent + '%';
+
+        let isDarkZone = false;
+        const viewportCenter = window.innerHeight / 2;
+
+        darkSections.forEach(section => {
+            const rect = section.getBoundingClientRect();
+            // Check if the center of the viewport is within the dark section
+            if (rect.top < viewportCenter && rect.bottom > viewportCenter) {
+                isDarkZone = true;
+            }
+        });
+
+        if (isDarkZone) {
+            body.style.backgroundColor = '#1a1a1a';
+            body.style.color = '#e8e6e1';
+            document.getElementById('cursor').style.borderColor = '#e8e6e1';
+        } else {
+            body.style.backgroundColor = '#e8e6e1';
+            body.style.color = '#1a1a1a';
+            document.getElementById('cursor').style.borderColor = '#1a1a1a';
+        }
     });
 
     // --- Common Helpers ---
@@ -839,34 +906,7 @@
         }
     });
 
-    // --- 5. Horizontal & Dark Mode ---
-    window.addEventListener('scroll', () => {
-        const scrollPercent = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
-        document.getElementById('progress').style.height = scrollPercent + '%';
-
-        const darkSection = document.getElementById('sec-4-wrapper');
-        const rect = darkSection.getBoundingClientRect();
-        // Expanded trigger area slightly to include heavy section
-        if (rect.top < window.innerHeight / 2 && rect.bottom > -200) {
-            body.style.backgroundColor = '#1a1a1a';
-            body.style.color = '#e8e6e1';
-            document.getElementById('cursor').style.borderColor = '#e8e6e1';
-        } else {
-            // Check if we are in the new dark section
-            const darkSection2 = document.getElementById('sec-rosy-machine');
-            const rect2 = darkSection2.getBoundingClientRect();
-            if(rect2.top < window.innerHeight/2 && rect2.bottom > 0) {
-                body.style.backgroundColor = '#1a1a1a';
-                body.style.color = '#e8e6e1';
-                document.getElementById('cursor').style.borderColor = '#e8e6e1';
-            } else {
-                body.style.backgroundColor = '#e8e6e1';
-                body.style.color = '#1a1a1a';
-                document.getElementById('cursor').style.borderColor = '#1a1a1a';
-            }
-        }
-    });
-
+    // --- 5. Horizontal Drift ---
     let sections = gsap.utils.toArray("#horizontal-track > div");
     gsap.to(sections, {
         xPercent: -100 * (sections.length - 1),
@@ -874,7 +914,7 @@
         scrollTrigger: { trigger: "#sec-4-pin", pin: true, scrub: 1, snap: 1 / (sections.length - 1), end: () => "+=" + document.querySelector("#horizontal-track").offsetWidth }
     });
 
-    // --- 5.5 Heavy Reality (REVERTED & UPDATED: The Bleed) ---
+    // --- 5.5 Heavy Reality (The Bleed) ---
     // Animation: The Bleed
     gsap.to("#heavy-main", { opacity: 1, y: 0, duration: 1.5, scrollTrigger: { trigger: "#sec-heavy", start: "center 70%" } });
     gsap.to(".heavy-bleed", {
@@ -886,6 +926,38 @@
     });
     gsap.to("#heavy-sub", { opacity: 1, y: 0, duration: 1.5, delay: 1, scrollTrigger: { trigger: "#sec-heavy", start: "center 70%" } });
 
+
+    // --- [NEW] 5.1 Distortion Image Section ---
+    gsap.fromTo("#distortion-image-asset", {
+        opacity: 0,
+        scale: 0.9,
+        y: 50
+    }, {
+        opacity: 1,
+        scale: 1,
+        y: 0,
+        duration: 2,
+        ease: "power2.out",
+        scrollTrigger: {
+            trigger: "#sec-distortion",
+            start: "top 80%",
+            end: "center 50%",
+            scrub: 1
+        }
+    });
+
+    gsap.fromTo("#distortion-caption-image", {
+        opacity: 0,
+        y: 20
+    }, {
+        opacity: 1,
+        y: 0,
+        duration: 1.5,
+        scrollTrigger: {
+            trigger: "#sec-distortion",
+            start: "center 60%"
+        }
+    });
 
     // --- Unsent Typewriter ---
     const msg1 = "I miss you.";
@@ -914,7 +986,7 @@
         .to("#frame-bottom", {width: "100%", duration: 0.5})
         .to("#frame-left", {height: "80%", duration: 0.4}); // Intentionally incomplete
 
-    // --- Mnemosyne (NEW: Reflection) ---
+    // --- Mnemosyne (Reflection) ---
     gsap.fromTo("#mnemosyne-text",
         { opacity: 0, y: 30 },
         { opacity: 1, y: 0, duration: 2, ease: "power2.out", scrollTrigger: { trigger: "#sec-mnemosyne", start: "center 70%" } }
@@ -922,7 +994,7 @@
     // Subtle water movement on reflection
     gsap.to(".mnemo-reflect", {
         scaleY: -1.1,
-        filter: "blur(6px) wave(4px)",
+        filter: "blur(6px)",
         duration: 3,
         repeat: -1,
         yoyo: true,
