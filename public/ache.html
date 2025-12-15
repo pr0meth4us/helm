@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mnemosyne | The Ache of Time</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/TextPlugin.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400;1,600&family=Manrope:wght@200;300;400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-color: #e8e6e1;
+            --text-color: #1a1a1a;
+            --accent-color: #b0b0b0;
+            --highlight: #cd5c27; /* Burnt orange for emphasis */
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            overflow-x: hidden;
+            cursor: none; /* Custom cursor */
+            transition: background-color 1.5s ease, color 1.5s ease;
+        }
+
+        /* Typography */
+        .font-serif { font-family: 'Cormorant Garamond', serif; }
+        .font-sans { font-family: 'Manrope', sans-serif; }
+
+        /* The Grain Overlay */
+        #noise-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 50;
+            opacity: 0.07;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* Custom Cursor */
+        #cursor {
+            position: fixed;
+            width: 20px; height: 20px;
+            border: 1px solid #1a1a1a;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 100;
+            transition: width 0.3s, height 0.3s, background-color 0.3s, border-color 0.3s;
+            mix-blend-mode: difference;
+        }
+        #cursor.hovered {
+            width: 60px; height: 60px;
+            background-color: rgba(255,255,255, 0.1);
+            backdrop-filter: invert(1);
+            border: none;
+        }
+
+        /* Blur Effect on Idle */
+        #content-wrapper { transition: filter 1.5s ease; }
+        body.idle #content-wrapper { filter: blur(8px) grayscale(80%); }
+
+        /* Abstract Shapes */
+        .shape {
+            position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.5; z-index: -1;
+            animation: float 20s infinite alternate ease-in-out;
+        }
+        .shape-1 { background: #a8c0ff; width: 400px; height: 400px; top: 10%; left: -100px; }
+        .shape-2 { background: #fbc2eb; width: 300px; height: 300px; top: 40%; right: -50px; animation-delay: -5s; }
+        .shape-3 { background: #c2e9fb; width: 500px; height: 500px; bottom: 10%; left: 20%; animation-delay: -10s; }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(30px, -50px) scale(1.1); }
+        }
+
+        /* Timeline */
+        .timeline {
+            position: fixed; right: 40px; top: 50%; height: 200px; width: 1px;
+            background: rgba(0,0,0,0.1); transform: translateY(-50%); z-index: 40;
+        }
+        .timeline-progress { width: 100%; background: #000; height: 0%; transition: height 0.1s; }
+
+        /* Rosy Overlay */
+        .rosy-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, rgba(255, 160, 122, 0.15), rgba(60, 30, 20, 0.2));
+            pointer-events: none; z-index: 35; opacity: 0; mix-blend-mode: multiply;
+        }
+
+        /* Utility Classes for Rewrite Section */
+        .rewrite-container {
+            position: relative; height: 5em; display: flex; justify-content: center; align-items: center;
+        }
+        .rewrite-layer {
+            position: absolute; top: 0; left: 0; width: 100%; text-align: center; transition: all 0.5s ease;
+        }
+        .text-reality {
+            color: #999; font-family: 'Manrope', sans-serif; font-weight: 300; letter-spacing: 0.05em;
+        }
+        .text-memory {
+            color: #cd5c27; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.4em; opacity: 0;
+        }
+        .strike-line {
+            position: absolute; top: 50%; left: 0; width: 0%; height: 1px; background-color: #1a1a1a; transform: translateY(-50%);
+        }
+
+        /* Glass Panel for Horizontal */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .section {
+            min-height: 100vh;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            position: relative; padding: 2rem;
+        }
+
+        /* Glitch Text */
+        .glitch-text:hover {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+            color: #cd5c27;
+        }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        /* Smooth Shape transition */
+        #jagged-poly { transition: stroke 1s; }
+
+        /* Typing Cursor */
+        .typing-cursor {
+            display: inline-block; width: 2px; height: 1em; background-color: currentColor;
+            animation: blink 1s step-end infinite; margin-left: 2px;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        /* Void Text */
+        .flee-text { transition: transform 0.2s ease-out; display: inline-block; }
+
+        /* Scatter Text */
+        .scatter-char { display: inline-block; will-change: transform, opacity; }
+
+        /* Hot Coal Effects */
+        .hot-coal {
+            text-shadow: 0 0 0px transparent;
+            transition: color 0.5s, text-shadow 0.5s;
+        }
+        .ghost-word {
+            filter: blur(0px);
+            transition: all 1s;
+        }
+        .burned-text {
+            color: inherit;
+            transition: color 0.5s;
+        }
+
+        /* Mnemosyne Reflection Effect */
+        .mnemo-reflect {
+            transform: scaleY(-1);
+            opacity: 0.2;
+            filter: blur(4px) wave(2px);
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0.5));
+            -webkit-background-clip: text;
+            background-clip: text;
+            pointer-events: none;
+            margin-top: -20px;
+        }
+
+        /* Glimpse of Us Effect */
+        .glimpse-container { position: relative; overflow: hidden; display: flex; justify-content: center; align-items: center; }
+        .glimpse-layer { position: absolute; transition: all 0.1s ease; }
+        .layer-stranger { filter: blur(4px); opacity: 0.8; color: #1a1a1a; }
+        .layer-memory { opacity: 0; filter: blur(0px); color: #cd5c27; mix-blend-mode: overlay; }
+
+        /* Last Meet Grid */
+        .meet-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 8px; width: 300px; }
+        .meet-dot { width: 6px; height: 6px; background-color: #1a1a1a; border-radius: 50%; opacity: 0.2; transition: opacity 0.5s; }
+        .meet-dot.active { opacity: 1; background-color: #cd5c27; box-shadow: 0 0 10px #cd5c27; }
+
+        /* Hands Animation */
+        .hand-path {
+            fill: none;
+            stroke: #1a1a1a;
+            stroke-width: 1.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .hand-container {
+            width: 100%;
+            height: 400px;
+            position: relative;
+        }
+
+        /* Heavy Reality Bleed */
+        .heavy-bleed { display: inline-block; transition: all 1s ease; }
+
+    </style>
+</head>
+<body class="antialiased">
+
+<div id="cursor"></div>
+<div id="noise-overlay"></div>
+<div class="rosy-overlay" id="rosy-overlay"></div>
+<div class="timeline"><div class="timeline-progress" id="progress"></div></div>
+
+<main id="content-wrapper" class="relative w-full">
+
+    <!-- Abstract Backgrounds -->
+    <div class="fixed w-full h-full overflow-hidden pointer-events-none">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <!-- 1. Intro -->
+    <section class="section" id="sec-1">
+        <p class="font-sans text-xs tracking-[0.5em] uppercase opacity-40 mb-4 fade-in">Exhibit 01: Distortion</p>
+        <h1 class="font-serif text-6xl md:text-9xl text-center leading-tight font-light opacity-0 hover-trigger" id="title-main">
+            Do you remember<br>
+            <span class="italic text-[#cd5c27] opacity-80">how it felt?</span>
+        </h1>
+        <p class="absolute bottom-12 font-sans text-xs opacity-40 animate-pulse tracking-[0.3em] uppercase">Scroll to recall</p>
+    </section>
+
+    <!-- 2. Sensory -->
+    <section class="section" id="sec-2">
+        <div class="max-w-2xl text-center relative z-10 hover-trigger">
+            <p class="text-3xl md:text-5xl leading-relaxed font-light font-serif split-text text-[#1a1a1a]">
+                The smell of dust on a hot lightbulb. <br>
+                The sound of a car passing by <br>
+                late at night,
+            </p>
+            <div class="mt-12 h-px w-0 bg-gray-400 mx-auto" id="line-divider"></div>
+            <p class="text-xl md:text-3xl mt-12 font-sans font-light tracking-wide text-gray-500 split-text-2">
+                when you were supposed to be asleep.
+            </p>
+        </div>
+    </section>
+
+    <!-- 3. The Glitch -->
+    <section class="section relative" id="sec-3">
+        <div class="z-10 text-center space-y-8 hover-trigger">
+            <h2 class="text-5xl md:text-7xl font-thin tracking-tighter font-serif">
+                It wasn't <span class="glitch-text italic font-normal cursor-none">better</span> back then.
+            </h2>
+            <p class="text-lg md:text-xl text-gray-500 max-w-lg mx-auto opacity-0 font-sans" id="glitch-desc">
+                It was just <span class="text-[#1a1a1a] font-bold">louder</span>. <br>
+                But the mind is a dishonest editor.
+            </p>
+        </div>
+    </section>
+
+    <!-- 3.5. ROSY RETROSPECTION (The Rewrite) -->
+    <section class="section h-[150vh]" id="sec-rosy">
+        <div class="sticky top-0 h-screen flex flex-col justify-center items-center w-full">
+
+            <p class="text-xs uppercase tracking-[0.4em] text-gray-400 mb-12 font-sans">The Rewrite</p>
+
+            <!-- Rewrite Sentence 1 -->
+            <div class="rewrite-container w-full max-w-4xl mb-8 hover-trigger">
+                <div class="rewrite-layer text-reality text-3xl md:text-5xl" id="reality-1">
+                    The waiting was boring and endless.
+                    <div class="strike-line" id="strike-1"></div>
+                </div>
+                <div class="rewrite-layer text-memory text-4xl md:text-6xl" id="memory-1">
+                    The anticipation was magical.
+                </div>
+            </div>
+
+            <!-- Rewrite Sentence 2 -->
+            <div class="rewrite-container w-full max-w-4xl mb-8 hover-trigger">
+                <div class="rewrite-layer text-reality text-3xl md:text-5xl" id="reality-2">
+                    The house was small and cold.
+                    <div class="strike-line" id="strike-2"></div>
+                </div>
+                <div class="rewrite-layer text-memory text-4xl md:text-6xl" id="memory-2">
+                    The house was cozy.
+                </div>
+            </div>
+
+            <!-- Rewrite Sentence 3 -->
+            <div class="rewrite-container w-full max-w-4xl hover-trigger">
+                <div class="rewrite-layer text-reality text-3xl md:text-5xl" id="reality-3">
+                    You were lonely.
+                    <div class="strike-line" id="strike-3"></div>
+                </div>
+                <div class="rewrite-layer text-memory text-4xl md:text-6xl" id="memory-3">
+                    You were free.
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- 4. The Smoothing (Jagged Edges) -->
+    <section class="section h-[150vh]" id="sec-smoothing">
+        <div class="sticky top-0 h-screen w-full flex flex-col items-center justify-center overflow-hidden">
+
+            <h3 class="absolute top-[20%] left-[10%] md:left-[20%] font-serif text-3xl md:text-5xl text-[#1a1a1a] opacity-0 z-10" id="smooth-text-1">
+                Nostalgia is just your brain
+            </h3>
+
+            <div class="relative w-[300px] h-[300px] md:w-[500px] md:h-[500px] hover-trigger z-0">
+                <svg viewBox="0 0 600 600" class="w-full h-full overflow-visible">
+                    <defs>
+                        <filter id="glow">
+                            <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                            <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                        </filter>
+                    </defs>
+                    <polygon id="jagged-poly" points="" stroke="#1a1a1a" stroke-width="1.5" fill="none" class="transition-colors duration-1000" />
+                </svg>
+            </div>
+
+            <h3 class="absolute bottom-[25%] right-[10%] md:right-[20%] font-serif italic text-3xl md:text-5xl text-[#cd5c27] opacity-0 z-10 text-right" id="smooth-text-2">
+                smoothing over the <br> jagged edges of grief.
+            </h3>
+
+            <div class="absolute bottom-12 text-center font-sans">
+                <p class="text-gray-400 text-xs uppercase tracking-widest mb-4 opacity-100 transition-opacity duration-500" id="label-reality">Grief (Raw)</p>
+                <p class="text-[#cd5c27] text-xs uppercase tracking-widest mb-4 opacity-0 absolute top-0 left-0 w-full" id="label-nostalgia">Nostalgia (Processed)</p>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- 4.5 The Loop (Degradation) -->
+    <section class="section space-y-8" id="sec-loop">
+        <div class="text-center space-y-6 hover-trigger">
+            <p class="font-serif text-4xl md:text-6xl text-[#1a1a1a] opacity-100">I remember it clearly.</p>
+            <p class="font-serif text-4xl md:text-6xl text-[#1a1a1a] opacity-60 blur-[2px]">I remember it.</p>
+            <p class="font-serif text-4xl md:text-6xl text-[#1a1a1a] opacity-30 blur-[4px]">I re m em be r.</p>
+            <p class="font-serif text-4xl md:text-6xl text-[#1a1a1a] opacity-10 blur-[8px] select-none">I . . . . .</p>
+        </div>
+        <p class="font-sans text-xs tracking-widest text-gray-500 mt-12">FILE CORRUPTION DETECTED</p>
+    </section>
+
+    <!-- 4.7 The Erosion -->
+    <section class="section" id="sec-erosion">
+        <div class="max-w-4xl text-center px-6 hover-trigger">
+            <p class="font-serif text-4xl md:text-6xl leading-relaxed text-[#1a1a1a]" id="erosion-text">
+                You think you are holding onto the water. <br>
+                <span class="italic text-gray-500">You are only holding onto the dampness of your hands.</span>
+            </p>
+        </div>
+    </section>
+
+    <!-- 5. Horizontal Drift (The Gallery) - Dark Mode -->
+    <section class="section !block h-[300vh] bg-[#1a1a1a] text-[#e8e6e1]" id="sec-4-wrapper" data-theme="dark">
+        <div class="sticky top-0 h-screen flex items-center overflow-hidden" id="sec-4-pin">
+            <div class="flex gap-12 px-12 items-center" id="horizontal-track">
+
+                <div class="flex-shrink-0 w-[60vw] md:w-[40vw] h-[60vh] glass-panel p-8 flex flex-col justify-end hover-trigger">
+                    <span class="text-6xl font-serif opacity-20 absolute top-4 right-8">01</span>
+                    <h3 class="text-3xl font-serif mb-4 text-[#e8e6e1]">Static</h3>
+                    <p class="text-gray-400 text-sm leading-loose font-sans">
+                        Trying to tune the radio to a station that doesn't exist anymore. The white noise feels like home.
+                    </p>
+                </div>
+
+                <div class="flex-shrink-0 w-[60vw] md:w-[40vw] h-[60vh] glass-panel p-8 flex flex-col justify-end hover-trigger">
+                    <span class="text-6xl font-serif opacity-20 absolute top-4 right-8">02</span>
+                    <h3 class="text-3xl font-serif mb-4 text-[#e8e6e1]">Halation</h3>
+                    <p class="text-gray-400 text-sm leading-loose font-sans">
+                        Lights bleeding into the darkness. The edges were sharp, but you remember them soft.
+                    </p>
+                </div>
+
+                <div class="flex-shrink-0 w-[60vw] md:w-[40vw] h-[60vh] glass-panel p-8 flex flex-col justify-end hover-trigger">
+                    <span class="text-6xl font-serif opacity-20 absolute top-4 right-8">03</span>
+                    <h3 class="text-3xl font-serif mb-4 text-[#e8e6e1]">Echo</h3>
+                    <p class="text-gray-400 text-sm leading-loose font-sans">
+                        Calling out in an empty room. The silence isn't empty; it's full of things you forgot to say.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5.5 The Heavy Reality (Bleed Animation) -->
+    <section class="section min-h-screen bg-[#e8e6e1] text-[#1a1a1a] relative" id="sec-heavy">
+        <div class="max-w-5xl text-center hover-trigger relative z-10">
+            <h2 class="font-sans font-extrabold text-5xl md:text-8xl tracking-tighter leading-none mb-8 opacity-0 translate-y-10" id="heavy-main">
+                IF THE THOUGHT OF<br>
+                <span class="heavy-bleed text-[#1a1a1a]">LOSING SOMEONE</span><br>
+                DOESN'T BOTHER YOU
+            </h2>
+
+            <p class="font-serif italic text-3xl md:text-5xl text-gray-500 opacity-0 translate-y-10" id="heavy-sub">
+                they never mattered<br>
+                to you all that much.
+            </p>
+        </div>
+    </section>
+
+    <!-- 6.5 The Unsent (Typewriter) -->
+    <section class="section" id="sec-unsent">
+        <div class="text-center space-y-4 hover-trigger">
+            <p class="font-sans text-xs uppercase tracking-widest text-gray-400">Draft 1 of 1</p>
+            <div class="h-32 flex items-center justify-center">
+                <p class="font-serif text-4xl md:text-6xl text-[#1a1a1a]">
+                    <span id="typewriter-text"></span><span class="typing-cursor"></span>
+                </p>
+            </div>
+            <p class="font-sans text-xs text-red-900 opacity-0 transition-opacity duration-1000" id="unsent-label">MESSAGE DELETED</p>
+        </div>
+    </section>
+
+    <!-- 6.7 The Museum -->
+    <section class="section" id="sec-museum">
+        <div class="relative p-12 hover-trigger">
+            <div class="absolute top-0 left-0 w-0 h-1 bg-[#1a1a1a]" id="frame-top"></div>
+            <div class="absolute top-0 right-0 w-1 h-0 bg-[#1a1a1a]" id="frame-right"></div>
+            <div class="absolute bottom-0 right-0 w-0 h-1 bg-[#1a1a1a]" id="frame-bottom"></div>
+            <div class="absolute bottom-0 left-0 w-1 h-0 bg-[#1a1a1a]" id="frame-left"></div>
+
+            <div class="text-center py-12 px-6">
+                <h2 class="font-serif text-6xl md:text-8xl text-[#1a1a1a] mb-6">MUSEUMS</h2>
+                <p class="font-sans text-lg tracking-widest text-gray-500 uppercase">
+                    are built for things<br>that hurt us.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6.8 MNEMOSYNE (Reflection Effect) -->
+    <section class="section h-[120vh]" id="sec-mnemosyne">
+        <div class="max-w-4xl text-center hover-trigger sticky top-0 h-screen flex flex-col justify-center">
+
+            <div class="relative mb-12">
+                <h2 class="font-serif text-6xl md:text-9xl text-[#1a1a1a] relative z-10">MNEMOSYNE</h2>
+                <h2 class="font-serif text-6xl md:text-9xl text-[#1a1a1a] mnemo-reflect absolute top-full left-0 w-full">MNEMOSYNE</h2>
+            </div>
+
+            <p class="font-sans text-sm tracking-[0.3em] uppercase text-gray-400 mb-12">The Goddess of Memory</p>
+            <p class="font-serif text-2xl md:text-4xl leading-relaxed text-[#1a1a1a] opacity-0" id="mnemosyne-text">
+                She did not give us memory to save us.<br>
+                She gave it to us so we would know<br>
+                <span class="italic text-[#cd5c27]">exactly what we have lost.</span>
+            </p>
+        </div>
+    </section>
+
+    <!-- 6.9 Glimpse of Us -->
+    <section class="section min-h-screen" id="sec-glimpse">
+        <div class="glimpse-container w-full h-[500px] hover-trigger relative flex justify-center items-center">
+            <h2 class="layer-stranger font-serif text-5xl md:text-8xl text-center leading-tight">
+                I look in <br> her eyes
+            </h2>
+            <h2 class="layer-memory font-serif text-5xl md:text-8xl text-center leading-tight absolute inset-0 flex justify-center items-center">
+                I see <br> a glimpse of us
+            </h2>
+        </div>
+        <p class="font-sans text-xs text-gray-400 mt-8 tracking-widest">Searching for you in strangers.</p>
+    </section>
+
+    <!-- 6. The Stranger -->
+    <section class="section" id="sec-stranger">
+        <div class="relative w-full max-w-4xl flex flex-col items-center hover-trigger">
+            <div class="flex justify-center items-center space-x-8 md:space-x-24 opacity-0" id="stranger-content">
+                <div class="text-right">
+                    <h3 class="text-sm text-gray-400 uppercase tracking-widest mb-2 font-sans">Then</h3>
+                    <p class="font-serif text-4xl italic text-[#1a1a1a]">The Child</p>
+                </div>
+                <div class="w-px h-32 bg-gray-300"></div>
+                <div class="text-left">
+                    <h3 class="text-sm text-gray-400 uppercase tracking-widest mb-2 font-sans">Now</h3>
+                    <p class="font-serif text-4xl italic text-[#1a1a1a]">The Stranger</p>
+                </div>
+            </div>
+            <p class="mt-16 text-center text-lg md:text-2xl font-light text-gray-600 max-w-xl opacity-0 font-sans" id="stranger-text">
+                If you walked into your childhood bedroom right now, <br>
+                <span class="text-[#1a1a1a] font-bold">you wouldn't fit in the frame.</span> <br><br>
+                You are keeping their secrets, <br>
+                but you have forgotten their voice.
+            </p>
+        </div>
+    </section>
+
+    <!-- 7.5 The Timeline -->
+    <section class="section" id="sec-timeline">
+        <div class="flex flex-col items-center space-y-12 hover-trigger opacity-60 hover:opacity-100 transition-opacity">
+            <div class="timeline-year font-serif text-4xl text-gray-300" data-speed="0.5">1998</div>
+            <div class="timeline-year font-serif text-4xl text-gray-400" data-speed="0.8">2003</div>
+            <div class="timeline-year font-serif text-4xl text-gray-500 font-italic" data-speed="1.2">2012</div>
+            <div class="timeline-year font-serif text-6xl text-[#cd5c27]" data-speed="1.5">NOW</div>
+            <div class="timeline-year font-serif text-4xl text-gray-500" data-speed="0.8">20??</div>
+        </div>
+    </section>
+
+    <!-- 7.7 The Paradox of Time -->
+    <section class="section" id="sec-paradox-time">
+        <div class="w-full max-w-5xl px-6 relative h-[40vh] hover-trigger">
+            <h3 class="font-serif italic text-4xl md:text-6xl text-left text-gray-400 absolute left-0 top-0 opacity-0" id="para-1">
+                It feels like yesterday.
+            </h3>
+            <h3 class="font-serif italic text-4xl md:text-6xl text-right text-gray-400 absolute right-0 bottom-0 opacity-0" id="para-2">
+                It feels like a lifetime ago.
+            </h3>
+            <div class="absolute inset-0 flex items-center justify-center opacity-0" id="para-center">
+                <p class="font-sans font-bold text-xl tracking-[0.5em] text-[#1a1a1a] uppercase bg-[#e8e6e1] px-4 z-10">
+                    Both are lies.
+                </p>
+                <div class="absolute w-full h-px bg-gray-300 z-0"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 8.5 The Void -->
+    <section class="section min-h-[50vh]" id="sec-void">
+        <div class="relative w-full max-w-4xl h-64 flex flex-wrap justify-center items-center gap-8" id="void-container">
+            <span class="flee-text font-serif text-2xl text-gray-400">Hold</span>
+            <span class="flee-text font-serif text-2xl text-gray-400">On</span>
+            <span class="flee-text font-serif text-2xl text-gray-400">To</span>
+            <span class="flee-text font-serif text-2xl text-gray-400">This</span>
+            <span class="flee-text font-serif text-2xl text-gray-400">Moment</span>
+        </div>
+        <p class="font-sans text-xs uppercase tracking-widest text-[#cd5c27] mt-8">Try to catch them</p>
+    </section>
+
+    <!-- 8.7 The Last Time -->
+    <section class="section" id="sec-last-time">
+        <div class="text-center max-w-3xl hover-trigger">
+            <p class="font-serif text-3xl md:text-5xl text-[#1a1a1a] mb-12">
+                One day you put the toy down<br>and never picked it up again.
+            </p>
+            <div class="inline-block border border-gray-400 p-8">
+                <p class="font-sans text-xs text-gray-500 uppercase tracking-widest mb-2">Days since then</p>
+                <p class="font-mono text-6xl md:text-8xl text-[#cd5c27]" id="days-counter">0000</p>
+            </div>
+            <p class="font-sans text-sm text-gray-400 mt-8 italic">And you didn't even notice.</p>
+        </div>
+    </section>
+
+    <!-- 8.8 Attachment (Upadana) -->
+    <section class="section min-h-[120vh]" id="sec-attachment">
+        <div class="max-w-2xl text-left hover-trigger pl-8 border-l-2 border-gray-300 sticky top-1/3" id="attach-border">
+            <p class="font-sans text-xs uppercase tracking-widest text-gray-400 mb-4">The Second Noble Truth</p>
+            <h3 class="font-serif text-4xl md:text-6xl text-[#1a1a1a] mb-8">Upādāna</h3>
+            <p class="font-serif text-xl md:text-3xl leading-relaxed text-gray-600" id="attach-text">
+                To hold a memory is to clutch a <span class="hot-coal inline-block text-[#1a1a1a]">hot coal</span><br>
+                with the intention of warming a <span class="ghost-word inline-block">ghost</span>.<br><br>
+                <span class="burned-text inline-block font-bold mt-4">You are the only one getting burned.</span>
+            </p>
+        </div>
+    </section>
+
+    <!-- 8.9 The Last Meet Theory (Finite Grid RESTORED) -->
+    <section class="section" id="sec-last-meet-grid">
+        <div class="max-w-4xl text-center hover-trigger">
+            <h3 class="font-serif text-3xl md:text-5xl text-[#1a1a1a] mb-8">The Finite Grid</h3>
+            <div class="meet-grid mx-auto mb-8" id="meet-dots">
+                <!-- Dots injected via JS -->
+            </div>
+            <p class="font-sans text-lg text-gray-500 leading-loose max-w-xl mx-auto opacity-0" id="meet-text">
+                There is a mathematical probability that you have already seen them for the <span class="text-[#cd5c27] font-bold">last time</span>.
+                <br>You just haven't said goodbye yet.
+            </p>
+        </div>
+    </section>
+
+    <!-- [NEW] 9.0 The Severed Connection (Creation of Adam) -->
+    <section class="section min-h-screen bg-[#e8e6e1] text-[#1a1a1a]" id="sec-adam-reach">
+        <div class="max-w-6xl w-full hover-trigger relative h-[500px] flex items-center justify-center">
+
+            <svg viewBox="0 0 1000 400" class="w-full h-full absolute inset-0 z-0 hand-container">
+                <!-- Left Hand (Reaching) -->
+                <path id="adam-left" class="hand-path" d="M-50,250 C150,250 350,200 480,200" stroke="#1a1a1a" stroke-width="2" fill="none" />
+                <!-- Right Hand (Reaching back) -->
+                <path id="adam-right" class="hand-path" d="M1050,150 C850,150 650,200 520,200" stroke="#1a1a1a" stroke-width="2" fill="none" />
+            </svg>
+
+            <div class="relative z-10 text-center opacity-0" id="adam-text-container">
+                <p class="font-serif text-3xl md:text-5xl text-[#1a1a1a] mb-4">Almost.</p>
+                <p class="font-sans text-sm text-gray-500 uppercase tracking-widest">The moment that never happened.</p>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- 10.0 The Cycle (Forgetting/Remembering) -->
+    <section class="section min-h-screen relative overflow-hidden" id="sec-cycle">
+        <div class="absolute inset-0 flex flex-col justify-center opacity-10 select-none pointer-events-none">
+            <div class="cycle-row text-[15vw] font-sans font-bold whitespace-nowrap text-[#1a1a1a] leading-none">FORGETTING REMEMBERING FORGETTING REMEMBERING</div>
+            <div class="cycle-row text-[15vw] font-sans font-bold whitespace-nowrap text-[#1a1a1a] leading-none">REMEMBERING FORGETTING REMEMBERING FORGETTING</div>
+            <div class="cycle-row text-[15vw] font-sans font-bold whitespace-nowrap text-[#1a1a1a] leading-none">FORGETTING REMEMBERING FORGETTING REMEMBERING</div>
+        </div>
+        <div class="relative z-10 max-w-2xl text-center hover-trigger">
+            <p class="font-serif text-3xl md:text-5xl text-[#1a1a1a]">Why does the sunset feel<br>like a closing door?</p>
+        </div>
+    </section>
+
+    <!-- 11.0 The Machine (Rosy Retrospection) -->
+    <section class="section min-h-screen bg-[#1a1a1a] text-[#e8e6e1]" id="sec-rosy-machine" data-theme="dark">
+        <!-- UI Elements -->
+        <div class="absolute top-12 left-12 text-xs font-sans tracking-[0.3em] opacity-50">ARCHIVE_REF: 2015-03-02</div>
+
+        <!-- The Card -->
+        <div class="relative max-w-3xl w-full p-12 border-l-2 border-gray-700 hover:border-[#cd5c27] transition-colors duration-500 group hover-trigger">
+            <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-[#cd5c27]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
+
+            <h2 class="text-xs font-sans font-bold tracking-[0.4em] mb-8 text-gray-500 group-hover:text-[#cd5c27] transition-colors">
+                <span class="group-hover:hidden">OBJECTIVE REALITY</span>
+                <span class="hidden group-hover:inline">RECONSTRUCTED MEMORY</span>
+            </h2>
+
+            <div class="relative min-h-[150px]">
+                <p class="text-2xl md:text-4xl font-sans font-light text-gray-400 absolute top-0 left-0 transition-all duration-700 group-hover:opacity-0 group-hover:blur-sm group-hover:translate-y-4">
+                    "The coffee was burnt, the apartment was small and drafty, and we had no money for furniture."
+                </p>
+                <p class="text-2xl md:text-4xl font-serif italic text-[#e8e6e1] absolute top-0 left-0 transition-all duration-700 opacity-0 blur-sm -translate-y-4 group-hover:opacity-100 group-hover:blur-0 group-hover:translate-y-0 group-hover:text-[#cd5c27]">
+                    "The aroma of roasted coffee filled our intimate sanctuary. We needed nothing but the empty space to fill with our dreams."
+                </p>
+            </div>
+
+            <div class="mt-12 flex items-center gap-2 text-xs font-sans tracking-widest opacity-50">
+                <span class="group-hover:hidden">HOVER TO ROMANTICIZE</span>
+                <span class="hidden group-hover:inline text-[#cd5c27]">MEMORY ALTERED</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- 7. Artifact -->
+    <section class="section" id="sec-artifact">
+        <div class="relative flex items-center justify-center hover-trigger">
+            <div class="w-4 h-4 bg-[#1a1a1a] rounded-full shadow-[0_0_20px_rgba(0,0,0,0.2)] z-20 cursor-none transition-all duration-500 hover:scale-150" id="artifact-dot"></div>
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <span class="artifact-shard absolute text-xs text-gray-500 opacity-0 whitespace-nowrap font-sans">A movie ticket</span>
+                <span class="artifact-shard absolute text-xs text-gray-500 opacity-0 whitespace-nowrap font-sans">Plastic jewelry</span>
+                <span class="artifact-shard absolute text-xs text-gray-500 opacity-0 whitespace-nowrap font-sans">A broken watch</span>
+                <span class="artifact-shard absolute text-xs text-gray-500 opacity-0 whitespace-nowrap font-sans">Smell of rain</span>
+                <span class="artifact-shard absolute text-xs text-gray-500 opacity-0 whitespace-nowrap font-sans">Static electricity</span>
+                <span class="artifact-shard absolute text-xs text-gray-500 opacity-0 whitespace-nowrap font-sans">Burnt toast</span>
+            </div>
+        </div>
+        <p class="mt-12 text-sm uppercase tracking-[0.2em] text-gray-400 font-sans">Debris of a former life</p>
+    </section>
+
+    <!-- 9.5 The Definition -->
+    <section class="section text-left items-start max-w-2xl mx-auto px-8" id="sec-def">
+        <div class="space-y-4 hover-trigger">
+            <h3 class="font-serif text-5xl italic text-[#1a1a1a]">Saudade</h3>
+            <p class="font-sans text-sm text-gray-500 italic">noun • /sauˈdad(ə)/</p>
+            <p class="font-serif text-xl leading-relaxed text-[#1a1a1a]">
+                A deep emotional state of nostalgic or profound melancholic longing for an absent something or someone that one loves. Moreover, it often carries a repressed knowledge that the object of longing might never return.
+            </p>
+        </div>
+    </section>
+
+    <!-- 8. The Fade -->
+    <section class="section" id="sec-5">
+        <div class="relative w-full max-w-4xl h-[400px] flex items-center justify-center hover-trigger">
+            <div class="absolute inset-0 bg-gradient-to-b from-transparent via-gray-200 to-transparent blur-xl scale-y-0" id="light-beam"></div>
+            <h2 class="text-6xl md:text-8xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-[#1a1a1a] to-gray-400 opacity-0 scale-90 font-sans" id="final-text">
+                SEHNSUCHT
+            </h2>
+        </div>
+        <p class="absolute bottom-12 text-xs text-gray-400 uppercase tracking-[0.5em] font-sans">
+            The End of the Reel
+        </p>
+    </section>
+
+</main>
+
+<script>
+    gsap.registerPlugin(ScrollTrigger, TextPlugin);
+
+    // --- Custom Cursor & Idle Logic ---
+    const cursor = document.getElementById('cursor');
+    const hoverTriggers = document.querySelectorAll('.hover-trigger, a, button, h1, span.italic');
+    const body = document.body;
+    let idleTimer;
+
+    // Cursor Movement
+    function resetIdle() {
+        body.classList.remove('idle');
+        clearTimeout(idleTimer);
+        idleTimer = setTimeout(() => {
+            body.classList.add('idle');
+        }, 3000);
+    }
+
+    document.addEventListener('mousemove', (e) => {
+        cursor.style.left = e.clientX + 'px';
+        cursor.style.top = e.clientY + 'px';
+
+        // Void Interaction (Fleeing Text)
+        const voidContainer = document.getElementById('void-container');
+        if(voidContainer) {
+            const rect = voidContainer.getBoundingClientRect();
+            if(e.clientY > rect.top && e.clientY < rect.bottom) {
+                document.querySelectorAll('.flee-text').forEach(text => {
+                    const tr = text.getBoundingClientRect();
+                    const tx = tr.left + tr.width/2;
+                    const ty = tr.top + tr.height/2;
+                    const dist = Math.hypot(e.clientX - tx, e.clientY - ty);
+                    if(dist < 100) {
+                        const angle = Math.atan2(e.clientY - ty, e.clientX - tx);
+                        const push = (100 - dist) * 1.5;
+                        gsap.to(text, {x: -Math.cos(angle) * push, y: -Math.sin(angle) * push, duration: 0.5});
+                    } else {
+                        gsap.to(text, {x: 0, y: 0, duration: 1});
+                    }
+                });
+            }
+        }
+        resetIdle();
+    });
+
+    // Add Scroll Reset for Idle (Fixed malfunctioning)
+    document.addEventListener('scroll', resetIdle);
+
+    // Hover States
+    hoverTriggers.forEach(el => {
+        el.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
+        el.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+    });
+
+    // --- Common Helpers ---
+    function setupSplitText(element) {
+        const text = element.innerText;
+        element.innerHTML = text.split("").map(char => {
+            if(char === " ") return "<span>&nbsp;</span>";
+            return `<span class="scatter-char">${char}</span>`;
+        }).join("");
+        return element.querySelectorAll("span");
+    }
+
+    // --- 1. Intro ---
+    gsap.to("#title-main", { opacity: 1, duration: 2, ease: "power2.out", delay: 0.5 });
+    gsap.fromTo(".fade-in", {opacity: 0, y: 20}, {opacity: 1, y: 0, duration: 1, stagger: 0.2});
+
+    // --- 2. Sensory ---
+    const chars1 = setupSplitText(document.querySelector(".split-text"));
+    const chars2 = setupSplitText(document.querySelector(".split-text-2"));
+
+    gsap.fromTo(chars1,
+        { opacity: 0, filter: "blur(15px)", y: 20 },
+        {
+            opacity: 1, filter: "blur(0px)", y: 0, duration: 1, stagger: 0.02,
+            scrollTrigger: { trigger: "#sec-2", start: "top 70%", end: "bottom 70%", scrub: 1 }
+        }
+    );
+
+    gsap.to("#line-divider", {
+        width: "200px", duration: 1.5,
+        scrollTrigger: { trigger: "#sec-2", start: "center 60%", scrub: true }
+    });
+
+    gsap.fromTo(chars2,
+        { opacity: 0, x: -20 },
+        {
+            opacity: 1, x: 0, duration: 1, stagger: 0.03,
+            scrollTrigger: { trigger: "#sec-2", start: "center 50%", end: "bottom 50%", scrub: 1 }
+        }
+    );
+
+    // --- 3. Glitch ---
+    gsap.to("#glitch-desc", {
+        opacity: 1, duration: 1,
+        scrollTrigger: { trigger: "#sec-3", start: "center 70%", toggleActions: "play none none reverse" }
+    });
+
+    // --- 3.5. Rosy ---
+    gsap.to("#rosy-overlay", {
+        opacity: 1,
+        scrollTrigger: { trigger: "#sec-rosy", start: "top center", end: "bottom center", scrub: true, toggleActions: "play reverse play reverse" }
+    });
+
+    const rewriteTl = gsap.timeline({
+        scrollTrigger: { trigger: "#sec-rosy", start: "top top", end: "bottom bottom", scrub: 1, pin: true }
+    });
+
+    rewriteTl
+        .to("#strike-1", { width: "100%", duration: 1 })
+        .to("#reality-1", { opacity: 0.3, duration: 1 }, "<")
+        .to("#memory-1", { opacity: 1, scale: 1.1, duration: 1.5 }, "-=0.5")
+        .to("#strike-2", { width: "100%", duration: 1 })
+        .to("#reality-2", { opacity: 0.3, duration: 1 }, "<")
+        .to("#memory-2", { opacity: 1, scale: 1.1, duration: 1.5 }, "-=0.5")
+        .to("#strike-3", { width: "100%", duration: 1 })
+        .to("#reality-3", { opacity: 0.3, duration: 1 }, "<")
+        .to("#memory-3", { opacity: 1, scale: 1.1, duration: 1.5 }, "-=0.5");
+
+    // --- 4. Smoothing ---
+    const numPoints = 120;
+    const radius = 200;
+    const centerX = 300;
+    const centerY = 300;
+    const jaggedPoints = Array.from({length: numPoints}, (_, i) => {
+        const angle = (i / numPoints) * Math.PI * 2;
+        const r = radius + (Math.random() - 0.5) * 150;
+        return `${centerX + Math.cos(angle) * r},${centerY + Math.sin(angle) * r}`;
+    }).join(" ");
+    const smoothPoints = Array.from({length: numPoints}, (_, i) => {
+        const angle = (i / numPoints) * Math.PI * 2;
+        return `${centerX + Math.cos(angle) * radius},${centerY + Math.sin(angle) * radius}`;
+    }).join(" ");
+
+    const poly = document.getElementById('jagged-poly');
+    poly.setAttribute('points', jaggedPoints);
+
+    const smoothTl = gsap.timeline({
+        scrollTrigger: { trigger: "#sec-smoothing", start: "top top", end: "bottom bottom", scrub: 1.5, pin: true }
+    });
+
+    smoothTl
+        .to("#jagged-poly", { attr: { points: smoothPoints }, stroke: "#cd5c27", strokeWidth: 4, filter: "url(#glow)", duration: 4 })
+        .to("#smooth-text-1", { opacity: 1, x: 20, duration: 2 }, "-=3.5")
+        .to("#smooth-text-2", { opacity: 1, x: -20, duration: 2 }, "-=3")
+        .to("#label-reality", { opacity: 0, duration: 1 }, "<")
+        .to("#label-nostalgia", { opacity: 1, duration: 1 }, "-=3");
+
+    // --- 4.7 The Erosion ---
+    const erosionChars = setupSplitText(document.querySelector("#erosion-text"));
+    gsap.to(erosionChars, {
+        x: () => (Math.random() - 0.5) * 500, // Scatter horizontally
+        y: () => (Math.random() - 0.5) * 500, // Scatter vertically
+        opacity: 0,
+        rotation: () => Math.random() * 360,
+        duration: 3,
+        ease: "power2.inOut",
+        scrollTrigger: {
+            trigger: "#sec-erosion",
+            start: "top center",
+            end: "bottom top",
+            scrub: 1
+        }
+    });
+
+    // --- 5. Horizontal & Dark Mode ---
+    window.addEventListener('scroll', () => {
+        const scrollPercent = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+        document.getElementById('progress').style.height = scrollPercent + '%';
+
+        const darkSection = document.getElementById('sec-4-wrapper');
+        const rect = darkSection.getBoundingClientRect();
+        // Expanded trigger area slightly to include heavy section
+        if (rect.top < window.innerHeight / 2 && rect.bottom > -200) {
+            body.style.backgroundColor = '#1a1a1a';
+            body.style.color = '#e8e6e1';
+            document.getElementById('cursor').style.borderColor = '#e8e6e1';
+        } else {
+            // Check if we are in the new dark section
+            const darkSection2 = document.getElementById('sec-rosy-machine');
+            const rect2 = darkSection2.getBoundingClientRect();
+            if(rect2.top < window.innerHeight/2 && rect2.bottom > 0) {
+                body.style.backgroundColor = '#1a1a1a';
+                body.style.color = '#e8e6e1';
+                document.getElementById('cursor').style.borderColor = '#e8e6e1';
+            } else {
+                body.style.backgroundColor = '#e8e6e1';
+                body.style.color = '#1a1a1a';
+                document.getElementById('cursor').style.borderColor = '#1a1a1a';
+            }
+        }
+    });
+
+    let sections = gsap.utils.toArray("#horizontal-track > div");
+    gsap.to(sections, {
+        xPercent: -100 * (sections.length - 1),
+        ease: "none",
+        scrollTrigger: { trigger: "#sec-4-pin", pin: true, scrub: 1, snap: 1 / (sections.length - 1), end: () => "+=" + document.querySelector("#horizontal-track").offsetWidth }
+    });
+
+    // --- 5.5 Heavy Reality (REVERTED & UPDATED: The Bleed) ---
+    // Animation: The Bleed
+    gsap.to("#heavy-main", { opacity: 1, y: 0, duration: 1.5, scrollTrigger: { trigger: "#sec-heavy", start: "center 70%" } });
+    gsap.to(".heavy-bleed", {
+        color: "#7f1d1d",
+        textShadow: "0 10px 20px rgba(127, 29, 29, 0.8)",
+        filter: "blur(2px)",
+        duration: 3,
+        scrollTrigger: { trigger: "#sec-heavy", start: "center 60%", end: "center 30%", scrub: 1 }
+    });
+    gsap.to("#heavy-sub", { opacity: 1, y: 0, duration: 1.5, delay: 1, scrollTrigger: { trigger: "#sec-heavy", start: "center 70%" } });
+
+
+    // --- Unsent Typewriter ---
+    const msg1 = "I miss you.";
+    const msg2 = "I hope you're doing well.";
+    const typeEl = document.getElementById("typewriter-text");
+
+    ScrollTrigger.create({
+        trigger: "#sec-unsent",
+        start: "top 60%",
+        onEnter: () => {
+            let tl = gsap.timeline();
+            tl.to(typeEl, { duration: 1.5, text: msg1, ease: "none" })
+                .to({}, {duration: 1})
+                .to(typeEl, { duration: 1, text: "", ease: "none" })
+                .to("#unsent-label", { opacity: 1, duration: 0.2, yoyo: true, repeat: 1 })
+                .to(typeEl, { duration: 2, text: msg2, ease: "none" });
+        }
+    });
+
+    // --- The Museum ---
+    const frameTl = gsap.timeline({
+        scrollTrigger: { trigger: "#sec-museum", start: "center 70%" }
+    });
+    frameTl.to("#frame-top", {width: "100%", duration: 0.5})
+        .to("#frame-right", {height: "100%", duration: 0.5})
+        .to("#frame-bottom", {width: "100%", duration: 0.5})
+        .to("#frame-left", {height: "80%", duration: 0.4}); // Intentionally incomplete
+
+    // --- Mnemosyne (NEW: Reflection) ---
+    gsap.fromTo("#mnemosyne-text",
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 2, ease: "power2.out", scrollTrigger: { trigger: "#sec-mnemosyne", start: "center 70%" } }
+    );
+    // Subtle water movement on reflection
+    gsap.to(".mnemo-reflect", {
+        scaleY: -1.1,
+        filter: "blur(6px) wave(4px)",
+        duration: 3,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut"
+    });
+
+    // --- [NEW] Glimpse of Us ---
+    gsap.to(".layer-memory", {
+        opacity: 1,
+        duration: 0.5,
+        scrollTrigger: {
+            trigger: "#sec-glimpse",
+            start: "center 60%",
+            end: "center 40%",
+            toggleActions: "play reverse play reverse"
+        }
+    });
+
+    // --- Stranger ---
+    gsap.to("#stranger-content", { opacity: 1, duration: 1.5, scrollTrigger: { trigger: "#sec-stranger", start: "center 70%" } });
+    gsap.to("#stranger-text", { opacity: 1, y: -20, duration: 1.5, delay: 0.5, scrollTrigger: { trigger: "#sec-stranger", start: "center 60%" } });
+
+    // --- Timeline Jitter ---
+    gsap.utils.toArray(".timeline-year").forEach(year => {
+        gsap.to(year, {
+            x: () => (Math.random() - 0.5) * 50,
+            filter: "blur(2px)",
+            opacity: 0.4,
+            scrollTrigger: { trigger: "#sec-timeline", start: "top bottom", end: "bottom top", scrub: year.dataset.speed }
+        });
+    });
+
+    // --- Paradox of Time ---
+    const paraTl = gsap.timeline({
+        scrollTrigger: { trigger: "#sec-paradox-time", start: "top 60%", end: "bottom 60%", scrub: 1 }
+    });
+    paraTl.to("#para-1", {opacity: 1, x: 20})
+        .to("#para-2", {opacity: 1, x: -20}, "<")
+        .to("#para-center", {opacity: 1, scale: 1.1}, "-=0.2");
+
+
+    // --- The Last Time Counter ---
+    let counter = { val: 0 };
+    ScrollTrigger.create({
+        trigger: "#sec-last-time",
+        start: "top 70%",
+        onEnter: () => {
+            gsap.to(counter, {
+                val: 4392,
+                duration: 3,
+                ease: "power2.out",
+                onUpdate: () => {
+                    document.getElementById("days-counter").innerText = Math.round(counter.val);
+                }
+            });
+        }
+    });
+
+    // --- Attachment (Upadana) ---
+    gsap.fromTo("#attach-border", { height: 0 }, { height: "100%", duration: 1, scrollTrigger: { trigger: "#sec-attachment", start: "center 70%" } });
+    gsap.fromTo("#attach-text", { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 1.5, delay: 0.5, scrollTrigger: { trigger: "#sec-attachment", start: "center 70%" } });
+    const burnTl = gsap.timeline({
+        scrollTrigger: { trigger: "#sec-attachment", start: "center 60%", end: "bottom 40%", scrub: 1 }
+    });
+    burnTl.to(".hot-coal", { color: "#ff4500", textShadow: "0 0 10px #ff4500, 0 0 20px #ff0000", duration: 1 })
+        .to(".ghost-word", { color: "transparent", textShadow: "0 0 15px rgba(255,255,255,0.8)", filter: "blur(4px)", duration: 1 }, "<")
+        .to(".burned-text", { color: "#3d0c0c", scale: 1.05, duration: 1 }, "-=0.5");
+
+    // --- 8.9 The Last Meet Theory (RESTORED FINITE GRID) ---
+    const meetGrid = document.getElementById("meet-dots");
+    // Create 100 dots
+    for(let i=0; i<100; i++) {
+        const dot = document.createElement("div");
+        dot.classList.add("meet-dot");
+        dot.classList.add("active"); // Start all active
+        meetGrid.appendChild(dot);
+    }
+
+    ScrollTrigger.create({
+        trigger: "#sec-last-meet-grid",
+        start: "top 60%",
+        onEnter: () => {
+            const dots = document.querySelectorAll(".meet-dot");
+            dots.forEach((d, i) => {
+                if (i < 96) { // 96 dots fade out randomly
+                    gsap.to(d, { opacity: 0.1, background: "transparent", boxShadow: "none", delay: Math.random() * 2 });
+                }
+            });
+            gsap.to("#meet-text", { opacity: 1, y: -20, duration: 1.5, delay: 2 });
+        }
+    });
+
+    // --- [NEW] 9.0 The Severed Connection (Creation of Adam) ---
+    // Initial set
+    gsap.set("#adam-left", { strokeDasharray: 500, strokeDashoffset: 500, opacity: 0 });
+    gsap.set("#adam-right", { strokeDasharray: 500, strokeDashoffset: 500, opacity: 0 });
+
+    const adamTl = gsap.timeline({
+        scrollTrigger: {
+            trigger: "#sec-adam-reach",
+            start: "center 70%",
+            end: "center 40%",
+            scrub: 1
+        }
+    });
+
+    adamTl.to("#adam-left", { strokeDashoffset: 0, opacity: 0.8, duration: 2 }, 0)
+        .to("#adam-right", { strokeDashoffset: 0, opacity: 0.8, duration: 2 }, 0)
+        // The Break: Right hand dissolves
+        .to("#adam-right", { opacity: 0, filter: "blur(10px)", duration: 1 })
+        .to("#adam-text-container", { opacity: 1, y: 0, duration: 1 });
+
+    // --- 10.0 The Cycle ---
+    const cycleRows = gsap.utils.toArray('.cycle-row');
+    cycleRows.forEach((row, i) => {
+        gsap.to(row, {
+            xPercent: i % 2 === 0 ? 10 : -10,
+            ease: "none",
+            scrollTrigger: {
+                trigger: "#sec-cycle",
+                start: "top bottom",
+                end: "bottom top",
+                scrub: 1
+            }
+        });
+    });
+
+    // --- Artifact ---
+    gsap.to("#artifact-dot", { scale: 50, opacity: 0, duration: 1, scrollTrigger: { trigger: "#sec-artifact", start: "center center", end: "bottom top", scrub: 0.5 } });
+    const shards = gsap.utils.toArray(".artifact-shard");
+    shards.forEach((shard, i) => {
+        const angle = (i / shards.length) * Math.PI * 2;
+        const distance = Math.random() * 200 + 100;
+        gsap.fromTo(shard,
+            { opacity: 0, x: 0, y: 0, scale: 0 },
+            {
+                opacity: 1, x: Math.cos(angle) * distance, y: Math.sin(angle) * distance, scale: 1 + Math.random(),
+                scrollTrigger: { trigger: "#sec-artifact", start: "center center", end: "bottom top", scrub: 1 }
+            }
+        );
+    });
+
+    // --- Final ---
+    gsap.to("#light-beam", { scaleY: 1, duration: 2, scrollTrigger: { trigger: "#sec-5", start: "center 80%", end: "center 50%", scrub: true } });
+    gsap.to("#final-text", { opacity: 1, scale: 1, filter: "blur(0px)", duration: 2, scrollTrigger: { trigger: "#sec-5", start: "center 70%", end: "center 40%", scrub: true } });
+
+</script>
+</body>
+</html>

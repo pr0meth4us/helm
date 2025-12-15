@@ -133,5 +133,28 @@ export const projects: Project[] = [
             { label: 'EXECUTE', url: 'https://grouper-five.vercel.app/', type: 'demo' },
             { label: 'BLUEPRINT', url: 'https://github.com/pr0meth4us/grouper', type: 'github' }
         ]
+    },
+    {
+        id: 'ache-of-time',
+        slug: 'the-ache-of-time', // Matches the route /projects/the-ache-of-time
+        title: 'The Ache of Time',
+        tagline: 'Interactive Conceptual Art Piece',
+        category: 'Tool',
+        description: 'A standalone digital art installation exploring memory, distortion, and loss. Built with GSAP and raw HTML5 canvas to create a disorienting, non-linear narrative experience. It functions not as a utility, but as a vessel for "Saudade"—the presence of absence.',
+        techStack: ['HTML5', 'GSAP Animation', 'WebGL', 'Audio Reactive'],
+        coverImage: 'https://res.cloudinary.com/dktzt7yn1/image/upload/v1741504865/mnemosyne_y4vsar.png',
+        isCommercial: false,
+        links: [
+            {
+                label: 'ENTER EXPERIENCE',
+                url: '/ache.html', // This link will be used on the special page
+                type: 'demo'
+            },
+            {
+                label: 'SOURCE CODE',
+                url: '#',
+                type: 'private'
+            }
+        ]
     }
 ];
